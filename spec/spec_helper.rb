@@ -1,13 +1,23 @@
-require File.dirname(__FILE__) + '/../../../../spec/spec_helper'
+$:.unshift(File.dirname(__FILE__) + '/../lib')
+plugin_spec_dir = File.dirname(__FILE__)
+
+require 'rubygems'
+require 'active_record' 
+require 'spec'
+
+RAILS_DEFAULT_LOGGER = Logger.new(plugin_spec_dir + "/debug.log")
+ActiveRecord::Base.logger = RAILS_DEFAULT_LOGGER
+
+require plugin_spec_dir + '/../init.rb'
+
+ActiveRecord::Base.configurations = YAML::load(IO.read(plugin_spec_dir + "/db/database.yml"))
+ActiveRecord::Base.establish_connection(ENV["DB"] || "sqlite3")
+ActiveRecord::Migration.verbose = false
+load(File.join(plugin_spec_dir, "db", "schema.rb"))
 
 module Spec::Example::ExampleGroupMethods
   alias :context :describe
 end
-
-plugin_spec_dir = File.dirname(__FILE__)
-ActiveRecord::Base.logger = Logger.new(plugin_spec_dir + "/debug.log")
-
-load(File.dirname(__FILE__) + '/schema.rb')
 
 class TaggableModel < ActiveRecord::Base
   acts_as_taggable_on :tags, :languages
